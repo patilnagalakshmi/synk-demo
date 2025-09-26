@@ -1,0 +1,20 @@
+name: Sample GH Action to test the Shipping/pom.xml
+on:
+  push:
+
+jobs:
+  shipping-snyk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/maven@master
+        continue-on-error: true # To make sure that SARIF upload gets called
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: ./shipping --sarif-file-output=snyk.sarif --severity-threshold=high --fail-on=upgradable
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: snyk.sarif
